@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "155203066584",
+    "project_id": "geophoto-1c05d",
+    "storage_bucket": "geophoto-1c05d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:155203066584:android:05a8f3b70332e08ec355ad",
+        "android_client_info": {
+          "package_name": "com.christianjoel.geophoto"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1HE70_tUOJaHh7gmvUjWZvwqZfw69244"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

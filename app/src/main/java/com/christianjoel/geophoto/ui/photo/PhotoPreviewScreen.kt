@@ -38,7 +38,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.christianjoel.geophoto.utils.captureComposeScreenshot
 import com.christianjoel.geophoto.utils.saveImageToGallery
 import com.christianjoel.geophoto.utils.shareImage
@@ -147,8 +149,11 @@ private fun CaptureOnlyContent(
     ) {
 
         imageUri?.let { uri ->
-            Image(
-                painter = rememberAsyncImagePainter(uri),
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(uri)
+                    .allowHardware(false)
+                    .build(),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
