@@ -79,6 +79,10 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
 
+    // Google Play In-App Update
+    implementation(libs.google.play.update)
+    implementation(libs.google.play.update.ktx)
+
 
     // Tests
     testImplementation(libs.junit)
