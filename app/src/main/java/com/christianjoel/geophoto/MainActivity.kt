@@ -1,7 +1,5 @@
 package com.christianjoel.geophoto
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -11,12 +9,12 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.snapshotFlow
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.christianjoel.geophoto.data.location.LocationHelper
 import com.christianjoel.geophoto.ui.navigation.AppNavGraph
+import com.christianjoel.geophoto.ui.permission.PermissionManager
 import com.christianjoel.geophoto.utils.InAppUpdateManager
 import com.christianjoel.geophoto.viewmodel.PhotoViewModel
 import kotlinx.coroutines.launch
@@ -24,10 +22,9 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
 
     private val viewModel: PhotoViewModel by viewModels()
-    private lateinit var locationHelper: LocationHelper
 
-    // Permissions
-    private var permissionRequestedOnce = false
+    private lateinit var locationHelper: LocationHelper
+    private lateinit var permissionManager: PermissionManager
 
     // In-App Update
     private lateinit var updateLauncher: ActivityResultLauncher<IntentSenderRequest>
@@ -38,34 +35,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         locationHelper = LocationHelper(this)
+        permissionManager = PermissionManager(this)
 
-        setupUpdateLauncher()
-
-        setContent {
-            AppNavGraph(viewModel)
-        }
-
+        setupUpdate()
+        setupUI()
         observeLocationRequests()
     }
 
-    // -----------------------------------
-    // In-App Update
-    // -----------------------------------
+    // --------------------------------
+    // UI
+    // --------------------------------
 
-    private fun setupUpdateLauncher() {
-        updateLauncher =
-            registerForActivityResult(
-                ActivityResultContracts.StartIntentSenderForResult()
-            ) { result ->
-                if (result.resultCode != RESULT_OK) {
-                    // User cancelled or update failed
-                    // Optional: show toast/snackbar
-                    Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-        inAppUpdateManager = InAppUpdateManager(this, updateLauncher)
+    private fun setupUI() {
+        setContent {
+            AppNavGraph(viewModel)
+        }
     }
+
+    // --------------------------------
+    // Lifecycle
+    // --------------------------------
 
     override fun onResume() {
         super.onResume()
@@ -74,7 +63,6 @@ class MainActivity : ComponentActivity() {
 
         inAppUpdateManager.registerListener()
 
-        // Trigger update only when Activity is stable
         if (!updateCheckedOnce) {
             updateCheckedOnce = true
             inAppUpdateManager.checkForUpdate()
@@ -86,62 +74,36 @@ class MainActivity : ComponentActivity() {
         inAppUpdateManager.unregisterListener()
     }
 
-    // -----------------------------------
+    // --------------------------------
     // Permissions
-    // -----------------------------------
+    // --------------------------------
 
     private fun checkPermissions() {
-        if (hasAllPermissions()) {
-            viewModel.setPermissionsGranted(true)
-            fetchLocationOnce()
-        } else {
-            viewModel.setPermissionsGranted(false)
-            if (!permissionRequestedOnce) {
-                permissionRequestedOnce = true
-                permissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    )
-                )
+        permissionManager.camera(mandatory = true) { cameraGranted ->
+            if (!cameraGranted) {
+                viewModel.setPermissionsGranted(false)
+                return@camera
+            }
+
+            permissionManager.location(mandatory = true) { locationGranted ->
+                viewModel.setPermissionsGranted(locationGranted)
+                if (locationGranted) {
+                    fetchLocationOnce()
+                }
             }
         }
     }
 
-    private val permissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { result ->
-            val granted =
-                result[Manifest.permission.CAMERA] == true &&
-                        result[Manifest.permission.ACCESS_FINE_LOCATION] == true
-
-            viewModel.setPermissionsGranted(granted)
-            if (granted) {
-                fetchLocationOnce()
-            }
-        }
-
-    private fun hasAllPermissions(): Boolean =
-        ContextCompat.checkSelfPermission(
-            this, Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                    this, Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-
-    // -----------------------------------
+    // --------------------------------
     // Location
-    // -----------------------------------
+    // --------------------------------
 
     private fun observeLocationRequests() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 snapshotFlow { viewModel.requestLocationUpdate.value }
                     .collect { shouldFetch ->
-                        if (shouldFetch) {
-                            fetchLocationOnce()
-                        }
+                        if (shouldFetch) fetchLocationOnce()
                     }
             }
         }
@@ -163,5 +125,26 @@ class MainActivity : ComponentActivity() {
                 viewModel.onLocationFetched()
             }
         }
+    }
+
+    // --------------------------------
+    // In-App Update
+    // --------------------------------
+
+    private fun setupUpdate() {
+        updateLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.StartIntentSenderForResult()
+            ) { result ->
+                if (result.resultCode != RESULT_OK) {
+                    Toast.makeText(
+                        this,
+                        "Update cancelled",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+        inAppUpdateManager = InAppUpdateManager(this, updateLauncher)
     }
 }

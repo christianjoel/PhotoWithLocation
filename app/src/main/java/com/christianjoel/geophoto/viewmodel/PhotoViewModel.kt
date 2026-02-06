@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+
 class PhotoViewModel : ViewModel() {
 
     private val _imageUri = mutableStateOf<Uri?>(null)
@@ -21,6 +22,10 @@ class PhotoViewModel : ViewModel() {
     private val _requestLocationUpdate = mutableStateOf(false)
     val requestLocationUpdate: State<Boolean> = _requestLocationUpdate
 
+    // --------------------------------
+    // Actions
+    // --------------------------------
+
     fun requestFreshLocation() {
         _requestLocationUpdate.value = true
     }
@@ -35,7 +40,6 @@ class PhotoViewModel : ViewModel() {
 
     fun setImage(uri: Uri) {
         _imageUri.value = uri
-        // 🔥 IMPORTANT: reset address for new photo
         _isAddressFetched.value = false
     }
 
