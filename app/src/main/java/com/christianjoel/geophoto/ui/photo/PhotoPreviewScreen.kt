@@ -205,7 +205,7 @@ private fun CaptureOnlyContent(
                 lineHeight = 18.sp
             )
             Text(
-                text = captureTime,
+                text = "🕒 $captureTime",
                 color = Color.White,
                 fontSize = 13.sp
             )
