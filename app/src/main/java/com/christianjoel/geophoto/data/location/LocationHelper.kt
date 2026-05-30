@@ -2,8 +2,10 @@ package com.christianjoel.geophoto.data.location
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.os.Build
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,15 +36,38 @@ class LocationHelper(private val context: Context) {
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val geocoder = Geocoder(context, Locale.getDefault())
-                val address = geocoder
-                    .getFromLocation(lat, lng, 1)
-                    ?.firstOrNull()
-                    ?.getAddressLine(0)
-                    ?: "Unknown location"
+//                val geocoder = Geocoder(context, Locale.getDefault())
+//                val address = geocoder
+//                    .getFromLocation(lat, lng, 1)
+//                    ?.firstOrNull()
+//                    ?.getAddressLine(0)
+//                    ?: "Unknown location"
+//
+//                withContext(Dispatchers.Main) {
+//                    onResult(address)
+//                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val geocoder = Geocoder(context, Locale.getDefault())
+                    geocoder.getFromLocation(
+                        lat,
+                        lng,
+                        1,
+                        object : Geocoder.GeocodeListener {
 
-                withContext(Dispatchers.Main) {
-                    onResult(address)
+                            override fun onGeocode(addresses: MutableList<Address>) {
+
+                                val address =
+                                    addresses.firstOrNull()?.getAddressLine(0)
+                                        ?: "Unknown location"
+
+                                onResult(address)
+                            }
+
+                            override fun onError(errorMessage: String?) {
+                                onResult("Address not available")
+                            }
+                        }
+                    )
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {

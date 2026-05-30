@@ -1,8 +1,11 @@
 package com.christianjoel.geophoto.ui.photo
 
+import android.Manifest
 import android.net.Uri
+import android.os.Build
 import android.view.View
-import androidx.compose.foundation.Image
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.christianjoel.geophoto.utils.captureComposeScreenshot
 import com.christianjoel.geophoto.utils.saveImageToGallery
@@ -52,6 +54,7 @@ fun PhotoPreviewScreen(
     viewModel: PhotoViewModel,
     onBack: () -> Unit
 ) {
+    val captureTime by viewModel.captureTime
     val context = LocalContext.current
 
     val imageUri by viewModel.imageUri
@@ -62,6 +65,17 @@ fun PhotoPreviewScreen(
             !address.contains("Unable", true)
 
     var captureView by remember { mutableStateOf<View?>(null) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            captureView?.let {
+                val file = captureComposeScreenshot(context, it)
+                saveImageToGallery(context, file)
+            }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -88,7 +102,8 @@ fun PhotoPreviewScreen(
                 view.setContent {
                     CaptureOnlyContent(
                         imageUri = imageUri,
-                        address = address
+                        address = address,
+                        captureTime = captureTime
                     )
                 }
             }
@@ -105,8 +120,13 @@ fun PhotoPreviewScreen(
                 enabled = isAddressReady,
                 onClick = {
                     captureView?.let {
-                        val file = captureComposeScreenshot(context, it)
-                        saveImageToGallery(context, file)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            val file = captureComposeScreenshot(context, it)
+                            saveImageToGallery(context, file)
+                        } else {
+                            // Android 9 and below — need permission
+                            permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        }
                     }
                 },
                 modifier = Modifier
@@ -140,7 +160,8 @@ fun PhotoPreviewScreen(
 @Composable
 private fun CaptureOnlyContent(
     imageUri: Uri?,
-    address: String
+    address: String,
+    captureTime: String
 ) {
     Box(
         modifier = Modifier
@@ -182,6 +203,11 @@ private fun CaptureOnlyContent(
                 color = Color.White,
                 fontSize = 13.sp,
                 lineHeight = 18.sp
+            )
+            Text(
+                text = captureTime,
+                color = Color.White,
+                fontSize = 13.sp
             )
         }
     }

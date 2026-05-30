@@ -20,6 +20,9 @@ import com.christianjoel.geophoto.ui.navigation.AppNavGraph
 import com.christianjoel.geophoto.utils.InAppUpdateManager
 import com.christianjoel.geophoto.viewmodel.PhotoViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
@@ -148,6 +151,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun fetchLocationOnce() {
+        val currentTime =
+            SimpleDateFormat(
+                "dd MMM yyyy hh:mm a",
+                Locale.getDefault()
+            ).format(Date())
+
+        viewModel.setCaptureTime(currentTime)
         locationHelper.getCurrentLocation { location ->
             if (location == null) {
                 viewModel.setAddress("Location not available")
