@@ -36,16 +36,6 @@ class LocationHelper(private val context: Context) {
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-//                val geocoder = Geocoder(context, Locale.getDefault())
-//                val address = geocoder
-//                    .getFromLocation(lat, lng, 1)
-//                    ?.firstOrNull()
-//                    ?.getAddressLine(0)
-//                    ?: "Unknown location"
-//
-//                withContext(Dispatchers.Main) {
-//                    onResult(address)
-//                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     val geocoder = Geocoder(context, Locale.getDefault())
                     geocoder.getFromLocation(
@@ -55,11 +45,9 @@ class LocationHelper(private val context: Context) {
                         object : Geocoder.GeocodeListener {
 
                             override fun onGeocode(addresses: MutableList<Address>) {
-
                                 val address =
                                     addresses.firstOrNull()?.getAddressLine(0)
                                         ?: "Unknown location"
-
                                 onResult(address)
                             }
 
@@ -68,6 +56,14 @@ class LocationHelper(private val context: Context) {
                             }
                         }
                     )
+                } else {
+                    val geocoder = Geocoder(context, Locale.getDefault())
+                    @Suppress("DEPRECATION")
+                    val addresses = geocoder.getFromLocation(lat, lng, 1)
+                    val address = addresses?.firstOrNull()?.getAddressLine(0) ?: "Unknown location"
+                    withContext(Dispatchers.Main) {
+                        onResult(address)
+                    }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {

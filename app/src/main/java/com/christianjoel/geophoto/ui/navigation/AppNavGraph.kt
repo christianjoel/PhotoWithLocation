@@ -43,8 +43,8 @@ fun AppNavGraph(viewModel: PhotoViewModel) {
 
         composable(Route.Camera) {
             CameraScreen(
-                onImageCaptured = { uri ->
-                    viewModel.setImage(uri)
+                viewModel = viewModel,
+                onPreviewClick = {
                     viewModel.setAddress("Fetching address...")
                     viewModel.requestFreshLocation()
                     navController.navigate(Route.Preview)
