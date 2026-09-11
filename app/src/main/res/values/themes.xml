@@ -4,7 +4,6 @@
     <style name="Theme.PhotoWithLocation"
         parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">true</item>
     </style>
 
 </resources>
