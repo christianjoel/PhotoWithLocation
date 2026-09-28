@@ -1,5 +1,6 @@
 package com.christianjoel.geophoto
 
+import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -9,7 +10,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.snapshotFlow
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -23,7 +27,18 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    override fun attachBaseContext(newBase: Context) {
+        val prefs = newBase.getSharedPreferences("geophoto_prefs", MODE_PRIVATE)
+        val lang = prefs.getString("pref_language", "en") ?: "en"
+        val locale = Locale.forLanguageTag(lang)
+        Locale.setDefault(locale)
+        val config = newBase.resources.configuration
+        config.setLocale(locale)
+        val context = newBase.createConfigurationContext(config)
+        super.attachBaseContext(context)
+    }
 
     private val viewModel: PhotoViewModel by viewModels()
 
@@ -34,10 +49,16 @@ class MainActivity : ComponentActivity() {
     private lateinit var updateLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var inAppUpdateManager: InAppUpdateManager
     private var updateCheckedOnce = false
+    private var currentLang = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        val prefs = getSharedPreferences("geophoto_prefs", MODE_PRIVATE)
+        val savedLang = prefs.getString("pref_language", "en") ?: "en"
+        currentLang = savedLang
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(savedLang))
 
         locationHelper = LocationHelper(this)
         permissionManager = PermissionManager(this)
@@ -45,6 +66,21 @@ class MainActivity : ComponentActivity() {
         setupUpdate()
         setupUI()
         observeLocationRequests()
+        observeLanguageChanges()
+    }
+
+    private fun observeLanguageChanges() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                snapshotFlow { viewModel.language.value }
+                    .collect { lang ->
+                        if (lang != currentLang) {
+                            currentLang = lang
+                            recreate()
+                        }
+                    }
+            }
+        }
     }
 
     // --------------------------------
@@ -124,14 +160,15 @@ class MainActivity : ComponentActivity() {
         viewModel.setCaptureTime(currentTime)
         locationHelper.getCurrentLocation { location ->
             if (location == null) {
-                viewModel.setAddress("Location not available")
+                viewModel.setAddress(getString(R.string.location_not_available))
                 viewModel.onLocationFetched()
                 return@getCurrentLocation
             }
 
             locationHelper.getAddress(
                 lat = location.latitude,
-                lng = location.longitude
+                lng = location.longitude,
+                language = viewModel.language.value
             ) { address ->
                 viewModel.setAddress(address)
                 viewModel.onLocationFetched()
@@ -151,7 +188,7 @@ class MainActivity : ComponentActivity() {
                 if (result.resultCode != RESULT_OK) {
                     Toast.makeText(
                         this,
-                        "Update cancelled",
+                        getString(R.string.update_cancelled),
                         Toast.LENGTH_SHORT
                     ).show()
                 }

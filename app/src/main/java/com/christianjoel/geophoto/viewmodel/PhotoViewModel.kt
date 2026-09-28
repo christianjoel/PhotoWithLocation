@@ -1,11 +1,31 @@
 package com.christianjoel.geophoto.viewmodel
 
+import android.app.Application
+import android.content.Context
 import android.net.Uri
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
+import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.AndroidViewModel
+import com.christianjoel.geophoto.R
 
-class PhotoViewModel : ViewModel() {
+class PhotoViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val prefs = application.getSharedPreferences("geophoto_prefs", Context.MODE_PRIVATE)
+
+    private val _language = mutableStateOf(prefs.getString("pref_language", "en") ?: "en")
+    val language: State<String> = _language
+
+    private val fetchingString: String
+        get() = getApplication<Application>().getString(R.string.fetching_address)
+
+    fun setLanguage(lang: String) {
+        _language.value = lang
+        prefs.edit().putString("pref_language", lang).apply()
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(lang))
+        retryLocation()
+    }
 
     private val _imageUri = mutableStateOf<Uri?>(null)
     val imageUri: State<Uri?> = _imageUri
@@ -37,7 +57,7 @@ class PhotoViewModel : ViewModel() {
     }
 
     fun retryLocation() {
-        _address.value = "Fetching address..."
+        _address.value = fetchingString
         _isAddressFetched.value = false
         requestFreshLocation()
     }
@@ -55,7 +75,7 @@ class PhotoViewModel : ViewModel() {
         _imageUris.value = listOf(uri)
 
         // Reset state for new photo
-        _address.value = "Fetching address..."
+        _address.value = fetchingString
         _captureTime.value = ""
         _isAddressFetched.value = false
     }
@@ -65,7 +85,7 @@ class PhotoViewModel : ViewModel() {
         _imageUri.value = uris.firstOrNull()
 
         // Reset state for new photo
-        _address.value = "Fetching address..."
+        _address.value = fetchingString
         _captureTime.value = ""
         _isAddressFetched.value = false
     }
@@ -75,8 +95,8 @@ class PhotoViewModel : ViewModel() {
         if (_imageUri.value == null) {
             _imageUri.value = uri
         }
-        if (_address.value.isBlank() || _address.value.contains("not available", true)) {
-            _address.value = "Fetching address..."
+        if (_address.value.isBlank() || _address.value.contains("not available", true) || _address.value.contains("கிடைக்கவில்லை", true)) {
+            _address.value = fetchingString
             _isAddressFetched.value = false
             requestFreshLocation()
         }
@@ -87,8 +107,8 @@ class PhotoViewModel : ViewModel() {
         if (_imageUri.value == null && uris.isNotEmpty()) {
             _imageUri.value = uris.first()
         }
-        if (_address.value.isBlank() || _address.value.contains("not available", true)) {
-            _address.value = "Fetching address..."
+        if (_address.value.isBlank() || _address.value.contains("not available", true) || _address.value.contains("கிடைக்கவில்லை", true)) {
+            _address.value = fetchingString
             _isAddressFetched.value = false
             requestFreshLocation()
         }
@@ -107,8 +127,10 @@ class PhotoViewModel : ViewModel() {
         _isAddressFetched.value =
             text.isNotBlank() &&
                     !text.contains("Fetching", ignoreCase = true) &&
+                    !text.contains("பெறப்படுகிறது", ignoreCase = true) &&
                     !text.contains("Location not available", ignoreCase = true) &&
-                    !text.contains("Address not available", ignoreCase = true)
+                    !text.contains("Address not available", ignoreCase = true) &&
+                    !text.contains("கிடைக்கவில்லை", ignoreCase = true)
     }
 
     fun resetAddress() {

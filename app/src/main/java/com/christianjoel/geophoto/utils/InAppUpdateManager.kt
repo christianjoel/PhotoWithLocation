@@ -3,6 +3,7 @@ package com.christianjoel.geophoto.utils
 import android.app.Activity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
+import com.christianjoel.geophoto.R
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -58,9 +59,9 @@ class InAppUpdateManager(
     private fun showRestartSnackbar() {
         Snackbar.make(
             activity.findViewById(android.R.id.content),
-            "Update downloaded",
+            activity.getString(R.string.update_downloaded),
             Snackbar.LENGTH_INDEFINITE
-        ).setAction("Restart") {
+        ).setAction(activity.getString(R.string.restart)) {
             appUpdateManager.completeUpdate()
         }.show()
     }

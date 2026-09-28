@@ -45,8 +45,7 @@ fun AppNavGraph(viewModel: PhotoViewModel) {
             CameraScreen(
                 viewModel = viewModel,
                 onPreviewClick = {
-                    viewModel.setAddress("Fetching address...")
-                    viewModel.requestFreshLocation()
+                    viewModel.retryLocation()
                     navController.navigate(Route.Preview)
                 },
                 onError = { }

@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
@@ -8,14 +7,12 @@ plugins {
 
 android {
     namespace = "com.christianjoel.geophoto"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.christianjoel.geophoto"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 8
         versionName = "1.7"
 
@@ -43,6 +40,14 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    androidComponents {
+        onVariants { variant ->
+            variant.outputs.forEach { output ->
+                output.outputFileName.set("PhotoWithGPSLocation-${variant.name}.apk")
+            }
+        }
     }
 }
 
@@ -96,3 +101,20 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+// Automatically clean up stale generated resource files (like "values 4.xml") to prevent duplicate resource build errors
+tasks.configureEach {
+    if (name.startsWith("process") || name.startsWith("merge") || name.startsWith("dex")) {
+        doFirst {
+            val buildDir = project.layout.buildDirectory.get().asFile
+            if (buildDir.exists()) {
+                buildDir.walkTopDown().forEach { file ->
+                    if (file.isFile && file.name.contains(" ")) {
+                        file.delete()
+                    }
+                }
+            }
+        }
+    }
+}
+

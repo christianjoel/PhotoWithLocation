@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
 import android.widget.Toast
+import com.christianjoel.geophoto.R
 import java.io.File
 import java.io.FileInputStream
 import java.io.OutputStream
@@ -30,7 +31,7 @@ fun saveImageToGallery(context: Context, imageFile: File) {
     )
 
     if (uri == null) {
-        Toast.makeText(context, "Failed to save image", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.failed_to_save), Toast.LENGTH_SHORT).show()
         return
     }
 
@@ -46,5 +47,5 @@ fun saveImageToGallery(context: Context, imageFile: File) {
         resolver.update(uri, contentValues, null, null)
     }
 
-    Toast.makeText(context, "Saved to Gallery 📸", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, context.getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show()
 }

@@ -1,3 +1,32 @@
 <resources>
-    <string name="app_name">PhotoWithLocation</string>
+    <string name="app_name">Photo with GPS Location</string>
+    <string name="watermark_location">Location</string>
+    <string name="watermark_captured">Captured</string>
+    <string name="save_to_gallery">Save to Gallery</string>
+    <string name="share_image">Share Image with Location</string>
+    <string name="retry_location">Retry Location</string>
+    <string name="fetching_location">Fetching Location...</string>
+    <string name="preview">Preview</string>
+    <string name="preview_photos">Preview (%1$d Photos)</string>
+    <string name="delete_photo">Delete Photo</string>
+    <string name="photos_added">%1$d photo(s) added</string>
+    <string name="preview_and_save">Preview &amp; Save</string>
+    <string name="capture">Capture</string>
+    <string name="add_from_gallery">Add from Gallery</string>
+    <string name="permission_required">Permission Required</string>
+    <string name="permission_message">Camera and Location permissions are required.</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="english">English</string>
+    <string name="tamil">தமிழ்</string>
+    <string name="photo_counter">Photo %1$d of %2$d</string>
+    <string name="failed_to_save">Failed to save image</string>
+    <string name="saved_to_gallery">Saved to Gallery 📸</string>
+    <string name="share_image_title">Share Image</string>
+    <string name="update_downloaded">Update downloaded</string>
+    <string name="restart">Restart</string>
+    <string name="location_not_available">Location not available</string>
+    <string name="address_not_available">Address not available</string>
+    <string name="unknown_location">Unknown location</string>
+    <string name="update_cancelled">Update cancelled</string>
+    <string name="fetching_address">Fetching address…</string>
 </resources>

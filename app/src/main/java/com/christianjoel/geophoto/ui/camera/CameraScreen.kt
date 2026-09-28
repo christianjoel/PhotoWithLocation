@@ -37,6 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.christianjoel.geophoto.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -129,7 +131,7 @@ fun CameraScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "📸 ${imageUris.size} photo(s) added",
+                        text = "📸 ${stringResource(R.string.photos_added, imageUris.size)}",
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
@@ -139,7 +141,7 @@ fun CameraScreen(
                         onClick = onPreviewClick,
                         modifier = Modifier.height(36.dp)
                     ) {
-                        Text("Preview & Save", fontSize = 12.sp)
+                        Text(stringResource(R.string.preview_and_save), fontSize = 12.sp)
                     }
                 }
             }
@@ -186,7 +188,7 @@ fun CameraScreen(
         ) {
             Icon(
                 imageVector = Icons.Filled.Camera,
-                contentDescription = "Capture",
+                contentDescription = stringResource(R.string.capture),
                 tint = Color.White
             )
         }
@@ -209,7 +211,7 @@ fun CameraScreen(
         ) {
             Icon(
                 imageVector = Icons.Filled.PhotoLibrary,
-                contentDescription = "Add from Gallery",
+                contentDescription = stringResource(R.string.add_from_gallery),
                 tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }

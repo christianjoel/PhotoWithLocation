@@ -8,6 +8,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.christianjoel.geophoto.R
 
 @Composable
 fun PermissionScreen() {
@@ -15,9 +17,9 @@ fun PermissionScreen() {
 
     AlertDialog(
         onDismissRequest = {},
-        title = { Text("Permission Required") },
+        title = { Text(stringResource(R.string.permission_required)) },
         text = {
-            Text("Camera and Location permissions are required.")
+            Text(stringResource(R.string.permission_message))
         },
         confirmButton = {
             Button(
@@ -30,7 +32,7 @@ fun PermissionScreen() {
                     )
                 }
             ) {
-                Text("Open Settings")
+                Text(stringResource(R.string.open_settings))
             }
         }
     )

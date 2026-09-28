@@ -7,15 +7,20 @@ import android.view.View
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -24,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +50,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import com.christianjoel.geophoto.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,11 +80,7 @@ fun PhotoPreviewScreen(
 
     val address by viewModel.address
 
-    val isAddressReady = address.isNotBlank() &&
-            !address.contains("Fetching", true) &&
-            !address.contains("not available", true) &&
-            !address.contains("Unable", true) &&
-            !address.contains("Unknown", true)
+    val isAddressReady by viewModel.isAddressFetched
 
     var captureView by remember { mutableStateOf<View?>(null) }
 
@@ -95,7 +100,7 @@ fun PhotoPreviewScreen(
         // 🔹 TOP BAR
         TopAppBar(
             modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
-            title = { Text(if (urisToDisplay.size > 1) "Preview (${urisToDisplay.size} Photos)" else "Preview") },
+            title = { Text(if (urisToDisplay.size > 1) stringResource(R.string.preview_photos, urisToDisplay.size) else stringResource(R.string.preview)) },
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(Icons.Default.ArrowBackIosNew, null)
@@ -115,7 +120,7 @@ fun PhotoPreviewScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete Photo",
+                        contentDescription = stringResource(R.string.delete_photo),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -162,7 +167,7 @@ fun PhotoPreviewScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Photo ${pagerState.currentPage + 1} of ${urisToDisplay.size}",
+                        text = stringResource(R.string.photo_counter, pagerState.currentPage + 1, urisToDisplay.size),
                         color = Color.White,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         fontSize = 12.sp,
@@ -195,6 +200,35 @@ fun PhotoPreviewScreen(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            // Language Selector Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                val currentLang = viewModel.language.value
+                OutlinedButton(
+                    onClick = { viewModel.setLanguage("en") },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (currentLang == "en") MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                    )
+                ) {
+                    Text(stringResource(R.string.english), fontWeight = if (currentLang == "en") FontWeight.Bold else FontWeight.Normal)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                OutlinedButton(
+                    onClick = { viewModel.setLanguage("ta") },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (currentLang == "ta") MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                    )
+                ) {
+                    Text(stringResource(R.string.tamil), fontWeight = if (currentLang == "ta") FontWeight.Bold else FontWeight.Normal)
+                }
+            }
+
             if (!isAddressReady) {
                 OutlinedButton(
                     onClick = { viewModel.retryLocation() },
@@ -202,7 +236,7 @@ fun PhotoPreviewScreen(
                         .fillMaxWidth()
                         .height(48.dp)
                 ) {
-                    Text(if (address.contains("Fetching", true)) "Fetching Location..." else "Retry Location")
+                    Text(if (address.contains("Fetching", true) || address.contains("பெறப்படுகிறது", true)) stringResource(R.string.fetching_location) else stringResource(R.string.retry_location))
                 }
                 Spacer(modifier = Modifier.height(12.dp))
             }
@@ -224,7 +258,7 @@ fun PhotoPreviewScreen(
                     .fillMaxWidth()
                     .height(56.dp)
             ) {
-                Text("Save to Gallery")
+                Text(stringResource(R.string.save_to_gallery))
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -241,7 +275,7 @@ fun PhotoPreviewScreen(
                     .fillMaxWidth()
                     .height(56.dp)
             ) {
-                Text("Share Image with Location")
+                Text(stringResource(R.string.share_image))
             }
         }
     }
@@ -283,8 +317,25 @@ private fun CaptureOnlyContent(
                 )
                 .padding(16.dp)
         ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.app_name),
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "📍 Location",
+                text = "📍 ${stringResource(R.string.watermark_location)}",
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
@@ -296,7 +347,7 @@ private fun CaptureOnlyContent(
                 lineHeight = 18.sp
             )
             Text(
-                text = "🕒 $captureTime",
+                text = "🕒 ${stringResource(R.string.watermark_captured)}: $captureTime",
                 color = Color.White,
                 fontSize = 13.sp
             )
