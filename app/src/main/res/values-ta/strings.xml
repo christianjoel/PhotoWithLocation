@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">புகைப்படம் மற்றும் ஜிபிஎஸ் இருப்பிடம்</string>
+    <string name="watermark_location">இருப்பிடம்</string>
+    <string name="watermark_captured">எடுக்கப்பட்ட நேரம்</string>
+    <string name="save_to_gallery">கேலரியில் சேமி</string>
+    <string name="share_image">இருப்பிடத்துடன் படத்தைப் பகிரவும்</string>
+    <string name="retry_location">இருப்பிடத்தை மீண்டும் முயற்சிக்கவும்</string>
+    <string name="fetching_location">இருப்பிடம் பெறப்படுகிறது…</string>
+    <string name="preview">முன்னோட்டம்</string>
+    <string name="preview_photos">முன்னோட்டம் (%1$d புகைப்படங்கள்)</string>
+    <string name="delete_photo">புகைப்படத்தை நீக்கு</string>
+    <string name="photos_added">%1$d புகைப்படம்(கள்) சேர்க்கப்பட்டது</string>
+    <string name="preview_and_save">முன்னோட்டம் &amp; சேமி</string>
+    <string name="capture">படம்பிடி</string>
+    <string name="add_from_gallery">கேலரியிலிருந்து சேர்</string>
+    <string name="permission_required">அனுமதி தேவை</string>
+    <string name="permission_message">கேமரா மற்றும் இருப்பிட அனுமதிகள் தேவை.</string>
+    <string name="open_settings">அமைப்புகளைத் திற</string>
+    <string name="english">English</string>
+    <string name="tamil">தமிழ்</string>
+    <string name="photo_counter">புகைப்படம் %1$d / %2$d</string>
+    <string name="failed_to_save">படத்தைச் சேமிப்பதில் தோல்வி</string>
+    <string name="saved_to_gallery">கேலரியில் சேமிக்கப்பட்டது 📸</string>
+    <string name="share_image_title">படத்தைப் பகிரவும்</string>
+    <string name="update_downloaded">புதுப்பிப்பு பதிவிறக்கப்பட்டது</string>
+    <string name="restart">மறுதொடக்கம்</string>
+    <string name="location_not_available">இருப்பிடம் கிடைக்கவில்லை</string>
+    <string name="address_not_available">முகவரி கிடைக்கவில்லை</string>
+    <string name="unknown_location">தெரியாத இருப்பிடம்</string>
+    <string name="update_cancelled">புதுப்பிப்பு ரத்து செய்யப்பட்டது</string>
+    <string name="fetching_address">முகவரி பெறப்படுகிறது…</string>
+</resources>

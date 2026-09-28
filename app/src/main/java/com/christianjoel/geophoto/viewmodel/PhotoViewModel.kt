@@ -21,6 +21,7 @@ class PhotoViewModel(application: Application) : AndroidViewModel(application) {
         get() = getApplication<Application>().getString(R.string.fetching_address)
 
     fun setLanguage(lang: String) {
+        if (_language.value == lang) return
         _language.value = lang
         prefs.edit().putString("pref_language", lang).apply()
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(lang))

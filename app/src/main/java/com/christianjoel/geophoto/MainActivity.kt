@@ -1,6 +1,7 @@
 package com.christianjoel.geophoto
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -76,7 +77,11 @@ class MainActivity : AppCompatActivity() {
                     .collect { lang ->
                         if (lang != currentLang) {
                             currentLang = lang
-                            recreate()
+                            val intent = Intent(this@MainActivity, MainActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            }
+                            startActivity(intent)
+                            finish()
                         }
                     }
             }
