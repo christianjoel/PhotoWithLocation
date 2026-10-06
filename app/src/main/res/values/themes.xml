@@ -3,7 +3,6 @@
 
     <style name="Theme.PhotoWithLocation"
         parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
 </resources>

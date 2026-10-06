@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.PhotoLibrary
@@ -35,9 +37,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.view.WindowCompat
 import com.christianjoel.geophoto.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,6 +54,14 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.christianjoel.geophoto.viewmodel.PhotoViewModel
 import java.io.File
+
+private tailrec fun Context.findActivity(): Activity? {
+    return when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> null
+    }
+}
 
 @Composable
 fun CameraScreen(
@@ -58,12 +73,22 @@ fun CameraScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val imageUris by viewModel.imageUris
 
+    DisposableEffect(Unit) {
+        val window = context.findActivity()?.window
+        if (window != null) {
+            val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+            insetsController.isAppearanceLightStatusBars = false
+            insetsController.isAppearanceLightNavigationBars = false
+        }
+        onDispose { }
+    }
+
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia()
     ) { uris ->
         if (uris.isNotEmpty()) {
             viewModel.addImages(uris)
-            Toast.makeText(context, context.getString(R.string.photos_added, uris.size), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.resources.getString(R.string.photos_added, uris.size), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -110,6 +135,17 @@ fun CameraScreen(
 
                 previewView
             },
+            onRelease = { previewView ->
+                try {
+                    val cameraProviderFuture = ProcessCameraProvider.getInstance(previewView.context)
+                    cameraProviderFuture.addListener({
+                        val cameraProvider = cameraProviderFuture.get()
+                        cameraProvider.unbindAll()
+                    }, ContextCompat.getMainExecutor(previewView.context))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            },
             modifier = Modifier.fillMaxSize()
         )
 
@@ -118,7 +154,8 @@ fun CameraScreen(
             Surface(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(top = 48.dp)
+                    .statusBarsPadding()
+                    .padding(top = 16.dp)
                     .padding(horizontal = 24.dp)
                     .fillMaxWidth(),
                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -179,6 +216,7 @@ fun CameraScreen(
             },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
                 .padding(bottom = 32.dp)
                 .size(72.dp)
                 .background(
@@ -202,6 +240,7 @@ fun CameraScreen(
             },
             modifier = Modifier
                 .align(Alignment.BottomStart)
+                .navigationBarsPadding()
                 .padding(start = 32.dp, bottom = 40.dp)
                 .size(56.dp)
                 .background(

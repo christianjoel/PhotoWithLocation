@@ -12,15 +12,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,11 +54,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.DisposableEffect
+import androidx.core.view.WindowCompat
 import coil.request.ImageRequest
 import com.christianjoel.geophoto.utils.captureComposeScreenshot
 import com.christianjoel.geophoto.utils.saveImageToGallery
 import com.christianjoel.geophoto.utils.shareImage
 import com.christianjoel.geophoto.viewmodel.PhotoViewModel
+
+private tailrec fun Context.findActivity(): Activity? {
+    return when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> null
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +82,18 @@ fun PhotoPreviewScreen(
 ) {
     val captureTime by viewModel.captureTime
     val context = LocalContext.current
+    val darkTheme = isSystemInDarkTheme()
+
+    DisposableEffect(darkTheme) {
+        val window = context.findActivity()?.window
+        if (window != null) {
+            val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+            // TopAppBar is light/white, so status bar icons MUST be dark (true) in both light & dark themes
+            insetsController.isAppearanceLightStatusBars = true
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
+        }
+        onDispose { }
+    }
 
     val imageUri by viewModel.imageUri
     val imageUris by viewModel.imageUris
@@ -97,7 +121,6 @@ fun PhotoPreviewScreen(
 
         // 🔹 TOP BAR
         TopAppBar(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
             title = { Text(if (urisToDisplay.size > 1) stringResource(R.string.preview_photos, urisToDisplay.size) else stringResource(R.string.preview)) },
             navigationIcon = {
                 IconButton(onClick = onBack) {
@@ -196,6 +219,7 @@ fun PhotoPreviewScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(16.dp)
         ) {
             // Language Selector Row

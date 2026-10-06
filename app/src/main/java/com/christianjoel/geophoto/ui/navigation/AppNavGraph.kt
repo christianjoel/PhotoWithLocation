@@ -1,5 +1,7 @@
 package com.christianjoel.geophoto.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,7 +48,13 @@ fun AppNavGraph(viewModel: PhotoViewModel) {
             PermissionScreen()
         }
 
-        composable(Route.Camera) {
+        composable(
+            route = Route.Camera,
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
+        ) {
             CameraScreen(
                 viewModel = viewModel,
                 onPreviewClick = {
