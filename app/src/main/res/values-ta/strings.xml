@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">புகைப்படம் மற்றும் ஜிபிஎஸ் இருப்பிடம்</string>
+<!--    <string name="app_name">புகைப்படம் மற்றும் ஜிபிஎஸ் இருப்பிடம்</string> -->
+    <string name="app_name">Photo with GPS Location்</string>
     <string name="watermark_location">இருப்பிடம்</string>
     <string name="watermark_captured">எடுக்கப்பட்ட நேரம்</string>
     <string name="save_to_gallery">கேலரியில் சேமி</string>

@@ -15,14 +15,26 @@ import com.christianjoel.geophoto.viewmodel.PhotoViewModel
 fun AppNavGraph(viewModel: PhotoViewModel) {
     val navController = rememberNavController()
     val hasPermissions by viewModel.hasPermissions
+    val imageUri by viewModel.imageUri
+    val imageUris by viewModel.imageUris
+
+    val startDestination = if (hasPermissions) {
+        if (imageUri != null || imageUris.isNotEmpty()) Route.Preview else Route.Camera
+    } else {
+        Route.Permission
+    }
 
     LaunchedEffect(hasPermissions) {
         if (hasPermissions) {
-            navController.navigate(Route.Camera) {
-                popUpTo(Route.Permission) {
-                    inclusive = true   // 🔥 REMOVE permission screen
+            val destination = if (imageUri != null || imageUris.isNotEmpty()) Route.Preview else Route.Camera
+            val currentRoute = navController.currentDestination?.route
+            if (currentRoute == null || currentRoute == Route.Permission) {
+                navController.navigate(destination) {
+                    popUpTo(Route.Permission) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
                 }
-                launchSingleTop = true
             }
         } else {
             navController.navigate(Route.Permission) {
@@ -34,7 +46,7 @@ fun AppNavGraph(viewModel: PhotoViewModel) {
 
     NavHost(
         navController = navController,
-        startDestination = Route.Permission
+        startDestination = startDestination
     ) {
 
         composable(Route.Permission) {
@@ -55,7 +67,13 @@ fun AppNavGraph(viewModel: PhotoViewModel) {
         composable(Route.Preview) {
             PhotoPreviewScreen(
                 viewModel = viewModel,
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (!navController.popBackStack()) {
+                        navController.navigate(Route.Camera) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                }
             )
         }
     }

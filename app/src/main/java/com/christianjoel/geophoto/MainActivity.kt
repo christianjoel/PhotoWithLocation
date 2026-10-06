@@ -1,10 +1,8 @@
 package com.christianjoel.geophoto
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
@@ -22,6 +20,7 @@ import com.christianjoel.geophoto.data.location.LocationHelper
 import com.christianjoel.geophoto.ui.navigation.AppNavGraph
 import com.christianjoel.geophoto.ui.permission.PermissionManager
 import com.christianjoel.geophoto.utils.InAppUpdateManager
+import com.christianjoel.geophoto.utils.PreferenceManager
 import com.christianjoel.geophoto.viewmodel.PhotoViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -31,8 +30,7 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     override fun attachBaseContext(newBase: Context) {
-        val prefs = newBase.getSharedPreferences("geophoto_prefs", MODE_PRIVATE)
-        val lang = prefs.getString("pref_language", "en") ?: "en"
+        val lang = PreferenceManager(newBase).getLanguageSync()
         val locale = Locale.forLanguageTag(lang)
         Locale.setDefault(locale)
         val config = newBase.resources.configuration
@@ -50,16 +48,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var updateLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var inAppUpdateManager: InAppUpdateManager
     private var updateCheckedOnce = false
-    private var currentLang = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        val prefs = getSharedPreferences("geophoto_prefs", MODE_PRIVATE)
-        val savedLang = prefs.getString("pref_language", "en") ?: "en"
-        currentLang = savedLang
-        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(savedLang))
+        val savedLang = PreferenceManager(this).getLanguageSync()
+        if (savedLang.isNotBlank() && AppCompatDelegate.getApplicationLocales().toLanguageTags() != savedLang) {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(savedLang))
+        }
 
         locationHelper = LocationHelper(this)
         permissionManager = PermissionManager(this)
@@ -67,25 +64,6 @@ class MainActivity : AppCompatActivity() {
         setupUpdate()
         setupUI()
         observeLocationRequests()
-        observeLanguageChanges()
-    }
-
-    private fun observeLanguageChanges() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                snapshotFlow { viewModel.language.value }
-                    .collect { lang ->
-                        if (lang != currentLang) {
-                            currentLang = lang
-                            val intent = Intent(this@MainActivity, MainActivity::class.java).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                            }
-                            startActivity(intent)
-                            finish()
-                        }
-                    }
-            }
-        }
     }
 
     // --------------------------------

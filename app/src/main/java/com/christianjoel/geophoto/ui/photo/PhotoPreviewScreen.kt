@@ -7,7 +7,6 @@ import android.view.View
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,7 +49,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.christianjoel.geophoto.R
 import androidx.compose.ui.text.font.FontWeight
@@ -184,7 +182,7 @@ fun PhotoPreviewScreen(
                         captureView = view
                         view.setContent {
                             CaptureOnlyContent(
-                                imageUri = urisToDisplay.firstOrNull(),
+                                imageUri = urisToDisplay.getOrNull(pagerState.currentPage) ?: urisToDisplay.firstOrNull(),
                                 address = address,
                                 captureTime = captureTime
                             )
@@ -320,8 +318,8 @@ private fun CaptureOnlyContent(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                AsyncImage(
+                    model = R.mipmap.ic_launcher,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )

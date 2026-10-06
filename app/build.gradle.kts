@@ -13,8 +13,8 @@ android {
         applicationId = "com.christianjoel.geophoto"
         minSdk = 24
         targetSdk = 37
-        versionCode = 8
-        versionName = "1.7"
+        versionCode = 10
+        versionName = "1.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -56,6 +56,7 @@ dependencies {
     // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.material)
 
 
@@ -104,7 +105,7 @@ dependencies {
 
 // Automatically clean up stale generated resource files (like "values 4.xml") to prevent duplicate resource build errors
 tasks.configureEach {
-    if (name.startsWith("process") || name.startsWith("merge") || name.startsWith("dex")) {
+    if (name.contains("Resource", ignoreCase = true) || name.startsWith("process") || name.startsWith("merge") || name.startsWith("package") || name.startsWith("dex") || name.startsWith("generate") || name.startsWith("compile")) {
         doFirst {
             val buildDir = project.layout.buildDirectory.get().asFile
             if (buildDir.exists()) {

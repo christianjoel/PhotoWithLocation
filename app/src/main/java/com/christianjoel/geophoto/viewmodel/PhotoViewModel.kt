@@ -1,21 +1,31 @@
 package com.christianjoel.geophoto.viewmodel
 
 import android.app.Application
-import android.content.Context
 import android.net.Uri
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.christianjoel.geophoto.R
+import com.christianjoel.geophoto.utils.PreferenceManager
+import kotlinx.coroutines.launch
 
 class PhotoViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val prefs = application.getSharedPreferences("geophoto_prefs", Context.MODE_PRIVATE)
+    private val prefManager = PreferenceManager(application)
 
-    private val _language = mutableStateOf(prefs.getString("pref_language", "en") ?: "en")
+    private val _language = mutableStateOf(PreferenceManager.DEFAULT_LANGUAGE)
     val language: State<String> = _language
+
+    init {
+        viewModelScope.launch {
+            prefManager.languageFlow.collect { lang ->
+                _language.value = lang
+            }
+        }
+    }
 
     private val fetchingString: String
         get() = getApplication<Application>().getString(R.string.fetching_address)
@@ -23,7 +33,9 @@ class PhotoViewModel(application: Application) : AndroidViewModel(application) {
     fun setLanguage(lang: String) {
         if (_language.value == lang) return
         _language.value = lang
-        prefs.edit().putString("pref_language", lang).apply()
+        viewModelScope.launch {
+            prefManager.setLanguage(lang)
+        }
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(lang))
         retryLocation()
     }
