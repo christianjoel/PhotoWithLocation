@@ -63,7 +63,7 @@ fun CameraScreen(
     ) { uris ->
         if (uris.isNotEmpty()) {
             viewModel.addImages(uris)
-           // Toast.makeText(context, "Added ${uris.size} photo(s) from gallery", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.photos_added, uris.size), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -168,7 +168,7 @@ fun CameraScreen(
                         ) {
                             val uri = Uri.fromFile(photoFile)
                             viewModel.addImage(uri)
-                          //  Toast.makeText(context, "Photo captured! 📸", Toast.LENGTH_SHORT).show()
+                        //    Toast.makeText(context, context.getString(R.string.photo_captured), Toast.LENGTH_SHORT).show()
                         }
 
                         override fun onError(exception: ImageCaptureException) {

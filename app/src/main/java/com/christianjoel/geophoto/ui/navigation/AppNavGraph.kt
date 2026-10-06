@@ -15,21 +15,14 @@ import com.christianjoel.geophoto.viewmodel.PhotoViewModel
 fun AppNavGraph(viewModel: PhotoViewModel) {
     val navController = rememberNavController()
     val hasPermissions by viewModel.hasPermissions
-    val imageUri by viewModel.imageUri
-    val imageUris by viewModel.imageUris
 
-    val startDestination = if (hasPermissions) {
-        if (imageUri != null || imageUris.isNotEmpty()) Route.Preview else Route.Camera
-    } else {
-        Route.Permission
-    }
+    val startDestination = if (hasPermissions) Route.Camera else Route.Permission
 
     LaunchedEffect(hasPermissions) {
         if (hasPermissions) {
-            val destination = if (imageUri != null || imageUris.isNotEmpty()) Route.Preview else Route.Camera
             val currentRoute = navController.currentDestination?.route
             if (currentRoute == null || currentRoute == Route.Permission) {
-                navController.navigate(destination) {
+                navController.navigate(Route.Camera) {
                     popUpTo(Route.Permission) {
                         inclusive = true
                     }
