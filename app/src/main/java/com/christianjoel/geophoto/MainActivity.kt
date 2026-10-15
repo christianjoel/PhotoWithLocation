@@ -47,7 +47,6 @@ class MainActivity : AppCompatActivity() {
     // In-App Update
     private lateinit var updateLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var inAppUpdateManager: InAppUpdateManager
-    private var updateCheckedOnce = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -84,18 +83,6 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         checkPermissions()
-
-        inAppUpdateManager.registerListener()
-
-        if (!updateCheckedOnce) {
-            updateCheckedOnce = true
-            inAppUpdateManager.checkForUpdate()
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        inAppUpdateManager.unregisterListener()
     }
 
     // --------------------------------
